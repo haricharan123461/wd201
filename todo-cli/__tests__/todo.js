@@ -4,8 +4,8 @@ describe("Todo test suite", () => {
   test("should add new todo", () => {
     expect(all.length).toBe(0);
     const date = new Date();
-    const yd = new Date(date);
     const td = new Date(date);
+    const yd = new Date(date);
     td.setDate(date.getDate() + 1);
     yd.setDate(date.getDate() - 1);
     add({
@@ -16,21 +16,19 @@ describe("Todo test suite", () => {
     add({
       title: "Todo test",
       completed: false,
-      dueDate: yd.toLocaleDateString("en-CA"),
+      dueDate: td.toLocaleDateString("en-CA"),
     });
     add({
       title: "Todo test",
       completed: false,
-      dueDate: td.toLocaleDateString("en-CA"),
+      dueDate: yd.toLocaleDateString("en-CA"),
     });
     expect(all.length).toBe(3);
   });
 
   test("should mark a todo as complete", () => {   
     expect(all[0].completed).toBe(false);
-    // Mark the todo as complete
     markAsComplete(0);
-    // Ensure the todo is now marked as complete
     expect(all[0].completed).toBe(true);
   });
 
@@ -42,16 +40,16 @@ describe("Todo test suite", () => {
   });
 
   
-  test("should retrive a todo as overdue", () => {
-    let k = [];
-    expect(k.length).toBe(0);
-    k = overdue();
-    expect(k.length).toBe(1);
-  });
   test("should retrive a todo as laterdue", () => {
     let k = [];
     expect(k.length).toBe(0);
     k = dueLater();
+    expect(k.length).toBe(1);
+  });
+  test("should retrive a todo as overdue", () => {
+    let k = [];
+    expect(k.length).toBe(0);
+    k = overdue();
     expect(k.length).toBe(1);
   });
 });
