@@ -6,12 +6,10 @@ const todoList = () => {
     const markAsComplete = (index) => {
       all[index].completed = true;
     };
-
     let i;
     const today = new Date();
     const todayDate = today.getDate();
     const overdue = () => {
-        
         const over = [];
         for (i = 0; i < all.length; i++) {
            let date = new Date(all[i].dueDate);
@@ -82,10 +80,7 @@ const todoList = () => {
     };
   };
   
-  // ####################################### #
-  // DO NOT CHANGE ANYTHING BELOW THIS LINE. #
-  // ####################################### #
-  
+
 module.exports = todoList;
 const todos = todoList();
 
