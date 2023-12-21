@@ -46,7 +46,7 @@ const todoList = () => {
     }
 
     const formattedDate = d => {
-        return d.toISOString().split("T")[1]
+        return d.toISOString().split("T")[0]
     }
     
     var dateToday = new Date()
