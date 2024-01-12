@@ -16,7 +16,7 @@
       "prettier --write ."
     ]
   },
-  "author": "Anvesh Nalimela <nalimelaanvesh@gmail.com>",
+  "author": "haricharan<jatothharicharan@gmail.com>",
   "license": "ISC",
   "devDependencies": {
     "cheerio": "^1.0.0-rc.12",
