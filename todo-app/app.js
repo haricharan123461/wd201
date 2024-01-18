@@ -1,77 +1,50 @@
 const express = require("express");
 const app = express();
-const { Todo } = require("./models"); // Assuming a Todo model is defined 
+const { Todo } = require("./models");
+
 const path = require("path");
 const bodyParser = require("body-parser");
-const csrf = require("tiny-csrf");
-const cookieParser = require("cookie-parser");
+app.use(bodyParser.json());
 
-// Middleware setup
-app.use(bodyParser.json()); // Parse JSON requests
-app.use(express.urlencoded({ extended: false })); // Parse URL-encoded requests
-app.use(cookieParser("Shh! some secret string")); // Parse cookies with a secret string
-app.use(csrf("this_should_be_32_character_long", ["POST", "PUT", "DELETE"])); // CSRF protection
-
-// Define route for the root URL
-app.get("/", async (request, response) => {
-  try {
-    // Retrieve all todos
-    const allTodos = await Todo.getTodos();
-
-    // Filter todos based on different criteria
-    const overdueTodos = allTodos.filter(todo => todo.isOverdue());
-    const dueTodayTodos = allTodos.filter(todo => todo.isDueToday());
-    const dueLaterTodos = allTodos.filter(todo => todo.isDueLater());
-    const completed = allTodos.filter(todo => todo.isCompleted());
-
-    // Check the request format (HTML or JSON) and respond accordingly
-    if (request.accepts("html")) {
-      // Render HTML using the "index.ejs" template
-      response.render('index.ejs', {
-        allTodos,
-        overdueTodos,
-        dueTodayTodos,
-        dueLaterTodos,
-        completed,
-        csrfToken: request.csrfToken(), // Pass CSRF token to the view
-      });
-    } else {
-      // Respond with JSON data
-      response.json({
-        allTodos,
-        overdueTodos,
-        dueTodayTodos,
-        dueLaterTodos
-      });
-    }
-  } catch (error) {
-    console.error(error);
-    response.status(404).json({ error: "rendering Error" });
-  }
+app.get("/todos", function (request, response) {
+  console.log("Todo List", request.body);
 });
+app.set("view engine", "ejs");
 
-// Set the view engine to "ejs" and serve static files from the 'public' directory
-app.set("view engine ", "ejs");
-app.use(express.static(path.join(__dirname, 'public')));
+app.get("/", async (request,response) =>{
+  const allTodos = await Todo.getTodos();
+  if(request.accepts("html")){
+    response.render('index',{allTodos});
+    allTodos
+  }else{
+    response.json({
+      allTodos
+    })
+  }
+  
+})
 
-// Define route to get a list of all todos
+app.use(express.static(path.join(__dirname,'public')));
+
 app.get("/todos", async function (_request, response) {
   console.log("Processing list of all Todos ...");
+  // FILL IN YOUR CODE HERE
 
-  try {
-    // Retrieve all todos
-    const todos = await Todo.findAll();
-    return response.json(todos)
-  } catch (error) {
+  // First, we have to query our PostgerSQL database using Sequelize to get list of all Todos.
+  // Then, we have to respond with all Todos, like:
+  // response.send(todos)
+  try{
+    const todo = await Todo.findAll();
+    return response.json(todo);
+
+  } catch(error){
     console.log(error);
     return response.status(422).json(error);
   }
 });
 
-// Define route to get a specific todo by ID
 app.get("/todos/:id", async function (request, response) {
   try {
-    // Retrieve a todo by ID
     const todo = await Todo.findByPk(request.params.id);
     return response.json(todo);
   } catch (error) {
@@ -80,28 +53,20 @@ app.get("/todos/:id", async function (request, response) {
   }
 });
 
-// Define route to add a new todo
 app.post("/todos", async function (request, response) {
   try {
-    // Add a new todo
-    const todo = await Todo.addTodo({
-      title: request.body.title,
-      dueDate: request.body.dueDate
-    });
-    return response.redirect("/"); // Redirect to the root after adding a todo
+    const todo = await Todo.addTodo(request.body);
+    return response.json(todo);
   } catch (error) {
     console.log(error);
     return response.status(422).json(error);
   }
 });
 
-// Define route to update a todo by ID
-app.put("/todos/:id", async function (request, response) {
+app.put("/todos/:id/markAsCompleted", async function (request, response) {
   const todo = await Todo.findByPk(request.params.id);
   try {
-    const status = todo.completed;
-    // Logic to toggle checkbox status (if true, set to false and vice versa)
-    const updatedTodo = await todo.setCompletionStatus(status);
+    const updatedTodo = await todo.markAsCompleted();
     return response.json(updatedTodo);
   } catch (error) {
     console.log(error);
@@ -109,19 +74,15 @@ app.put("/todos/:id", async function (request, response) {
   }
 });
 
-// Define route to delete a todo by ID
 app.delete("/todos/:id", async function (request, response) {
   console.log("We have to delete a Todo with ID: ", request.params.id);
+  // FILL IN YOUR CODE HERE
 
-  try {
-    // Delete a todo by ID
-    const deletedItem = await Todo.deleteTodo(request.params.id);
-    response.send(deletedItem ? true : false);
-  } catch (error) {
-    console.error(error);
-    return response.status(442).json(error);
-  }
+  // First, we have to query our database to delete a Todo by ID.
+  // Then, we have to respond back with true/false based on whether the Todo was deleted or not.
+  // response.send(true)
+  const deleteFlag = await Todo.destroy({ where: { id: request.params.id}})
+   response.send(deleteFlag?true:false)
 });
 
-// Export the express app
 module.exports = app;
